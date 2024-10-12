@@ -1,46 +1,49 @@
-# Genom 
- 
-## Описание программы :
-Программа содержит две основные функции для работы с последовательностями нуклеиновых кислот.
-Функция filter_fastq(seq, gc_bounds,length_bounds,quality_threshold) возвращает словарь состоящий из FASTQ-сиквенсов удовлетворящих параметрам   фильтрации. 
-Функция принимает на вход 4 аргумента, seq - словарь состоящий из FASTQ-сиквенсов и параметры фильтрации:
-        gc_bounds - интервал состава GC в процентах, по умолчанию
-        gc_bound = (0, 100)от 0% до 100%, при вводе gc_bound = (20, 80)-
-        от 20% до 80% включительно. При вводеодного числа, считается,
-        что это верхняя граница gc_bound = 45 - состав GC меньше  или
-        равен 45%.
-        length_bounds - длина интервала для фильтрации, по умолчанию
-        length_bounds = (0, 2**32),от 0 до 2 в степени 32.
-        При вводе одного числа,считается, что это верхняя граница,
-        length_bounds = 32 - от 0 до 32
-        quality_threshold - пороговое значение качества среднего рида,
-        по умолчанию равно 0(шкала Phred33). Риды со ступенью
-        качества по всем нуклеотидам ниже порогового отбрасываются.
-    Возвращаемое значение:словарь состоящий из FASTQ-сиквенсов
-    удовлетворящих параметрамфильтрации, при наличии таковых или пустой
-    при отсутсвии иквенсов удовлетворящих параметрам.
-Функция run_dna_rna_tools() возвращает  последовательности нуклеиновых
- кислот после проведения указанной в аргументе процедуры над переданными в
- функцию изначальными последовательностями ДНК или РНК.
- Функция проводит проверку на возможность существованияи значальных
- последовательностей ДНК и РНК. При наличии Т и U в одно последовательности,
-  функция прекращается и возвращает сообщение пользователю:
-  "Please insert correct sequence"
-  Вариант вызова функции:
-    run_dna_rna_tools('ATG','aT','reverse')
-        'ATG','aT',... - произвольное количество аргументов с
-        последовательностями ДНК или РНК в формате str.
-        'reverse' - всегда последний аргумент функции, с указанием процедуры
-        которую необходимо выполнить в формате str.
-        Список процедур:
-            'reverse' - вернуть развёрнутую последовательность.
-            'transcribe' - вернуть транскрибированную последовательность.
-            'complement' - вернуть комплементарную последовательность.
-            'reverse_complement' - вернуть обратную комплементарную.
-            последовательность.
-    Возвращаемое значение: строка с одной последовательностью нуклеиновых
-    кислот или список последовательностей нуклеиновых кислот, в зависимости
-    от количества переданных изначально последовательностей.
+Program Genom  and bio_files_processor
+Developer:
+Kichigina Natalia
+Programm description :
+Scrypt genom consist of two functions:
 
-Разработчик:
-Кичигина Наталья 
+-Function filter_fastq(input_fastq, output_fastq, gc_bounds,length_bounds,
+quality_threshold) returns new file with fastq sequnces according to filtering parameteres.  Function create new file in the 'filtered' directory in same directory as input_fastq.
+Function get 5 arguments:
+1) input_fastq -absolut path (row line r'path') to input fastq file;
+2) output_fastq - name of output file with filtered fastq seqs.
+        Write new file in 'filtered' directory in the same directory as
+        input_file.
+3) gc_bounds - interval of quantity of GC in percenst, default
+        gc_bound = (0, 100)from 0% to 100%, if gc_bound = (20, 80)-
+        from 20% to 80% including. In case of one number, it counts
+        that it is high limit, gc_bound = 45 - quantity of GC lower or
+        equal 45%;
+4) length_bounds - interval of read length, default
+        length_bounds = (0, 2**32),from 0 to 2 in power 32.
+        In case of one number, it counts that it is high limit,
+        length_bounds = 32 - from 0 to 32;
+5) quality_threshold - treshhold for quality of mean read,
+        default 0(scale Phred33). Reads with quality lower then
+        treshold are decline.
+
+Function run_dna_rna_tools() returns nuc acid sequence after actions on initial RNA or DNA nucs sequence ordered by the procedure wrote in argument. Function make check for exsistance of initial nucs sequences, by checking simultanously presence of T and U in seq.In case of negarive result func returns:
+    "Please insert correct sequence"
+Possible variant of func colling:
+ run_dna_rna_tools('ATG','aT','reverse')
+'ATG','aT',... - optional quantity of arguments, consisting of nuc sequences in str format.
+        'reverse' - always last parameter in function, with instruction for required procedure.
+
+Procedure list:
+            'reverse' - return reversed sequence.
+      'transcribe' - return transcribed sequence.
+      'complement' - return comlemented sequence.
+      'reverse_complement' - returns reversed and complemented seq.
+Return value: string with one sequence of nucs or list with multiple  seqs of nucs, depending on quantity of initial seqs.
+
+Script bio_files_processor consist to functions:
+    Function convert_multiline_fasta_to_oneline(input_fasta: str,  output_fasta: str = 'oneline.fasta') take two arguments:
+input_fasta -absolut path (row line r'path') to fasta file with  multiple lines of nucs
+ output_fasta -is not obligate, name of output file with nucs writed in one line, as default file name is 'oneline_fasta.fasta'
+    Write new file in the same directory as input_fasta
+
+    Function parse_blast_output(input_file, output_file) take two arguments:
+input_file -absolut path (row line r'path') to BLAST file
+ output_file - name of output file with result protein list, placed in one column. Write new file in the same directory as input_file.
