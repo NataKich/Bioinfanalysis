@@ -1,75 +1,98 @@
-def valid(seq):  # ф-ия проверки существования посл-ти
-    for d in seq[: -1]:
-        if ('U' in d or 'u' in d) and ('T' in d or 't' in d):
+def valid(seq):
+    '''Check sequence is real'''
+    for nuc in seq[: -1]:
+        if ('U' in nuc or 'u' in nuc) and ('T' in nuc or 't' in nuc):
             return False
 
 
-def transcribe(seq):  # ф-ия транскрибирования
+def transcribe(seq):
+    '''Nuc transcribe function'''
     trans = []
-    for i in seq:
-        i = i.replace('T', 'U')  # Замена 'T' на 'U'
-        i = i.replace('t', 'u')  # Замена 't' на 'u'
-        trans.append(i)
+    for nuc in seq:
+        ''''Replace uracil by thymine'''
+        nuc = nuc.replace('T', 'U')
+        nuc = nuc.replace('t', 'u')
+        trans.append(nuc)
     if len(trans) == 1:
-        return trans[0]  # Условие для вывода одной строки или списка
+        '''Çheck the length of result sequence
+        for output form'''
+        return trans[0]
     else:
         return trans
 
 
-def reverse(seq):  # ф-ия реверсирования посл-ти
+def reverse(seq):
+    '''Reverse sequence function'''
     rev = []
-    for i in seq:
-        rev.append(i[len(i):: -1])  # Переворот посл-ти и добавление в список
+    for nuc in seq:
+        '''Reverse sequence and add to list'''
+        rev.append(nuc[len(nuc):: -1])
     if len(rev) == 1:
-        return rev[0]  # Условие для вывода одной строки или списка
+        '''Çheck the length of result sequence
+        for output form'''
+        return rev[0]
     else:
         return rev
 
 
-def complement(seq):  # ф-ия комплементирования
+def complement(seq):
+    '''Complement function, find pair for
+    corresponding nuc'''
     comp = []
-    for i in seq:
-        if 'U' in i or 'u' in i:
-            x = {'G': 'C', 'C': 'G',  # Словарь для РНК посл-ти
-                 'g': 'c', 'c': 'g',
-                 'A': 'U', 'U': 'A',
-                 'a': 'u', 'u': 'a'}
+    for nuc in seq:
+        if 'U' in nuc or 'u' in nuc:
+            rna_dict = {'G': 'C', 'C': 'G',
+                        'g': 'c', 'c': 'g',
+                        'A': 'U', 'U': 'A',
+                        'a': 'u', 'u': 'a'}
+            x = rna_dict
         else:
-            x = {'T': 'A', 'A': 'T',  # Словарь для ДНК посл-ти
-                 'a': 't', 't': 'a',
-                 'G': 'C', 'C': 'G',
-                 'g': 'c', 'c': 'g'}
+            dna_dict = {'T': 'A', 'A': 'T',
+                        'a': 't', 't': 'a',
+                        'G': 'C', 'C': 'G',
+                        'g': 'c', 'c': 'g'}
+            x = dna_dict
         res_seq = ''
-        for j in i:
-            res_seq += x.get(j)  # Поиск значений по словарю
+        for j in nuc:
+            '''Getting value from dictionary'''
+            res_seq += x.get(j)
         comp.append(res_seq)
     if len(comp) == 1:
-        return comp[0]  # Условие для вывода одной строки или списка
+        '''Çheck the length of result sequence
+        for output form'''
+        return comp[0]
     else:
         return comp
 
 
-def reverse_complement(seq):  # ф-ия комплементирования и реверсирования
+def reverse_complement(seq):
+    '''Reverse and Complement function, find pair for
+    corresponding nuc and reversing sequence'''
     comp = []
-    for i in seq:
-        if 'U' in i or 'u' in i:
-            x = {'G': 'C', 'C': 'G',  # Словарь для РНК посл-ти
-                 'g': 'c', 'c': 'g',
-                 'A': 'U', 'U': 'A',
-                 'a': 'u', 'u': 'a'}
+    for nuc in seq:
+        if 'U' in nuc or 'u' in nuc:
+            rna_dict = {'G': 'C', 'C': 'G',
+                        'g': 'c', 'c': 'g',
+                        'A': 'U', 'U': 'A',
+                        'a': 'u', 'u': 'a'}
+            x = rna_dict
         else:
-            x = {'T': 'A', 'A': 'T',  # Словарь для ДНК посл-ти
-                 'a': 't', 't': 'a',
-                 'G': 'C', 'C': 'G',
-                 'g': 'c', 'c': 'g'}
+            dna_dict = {'T': 'A', 'A': 'T',
+                        'a': 't', 't': 'a',
+                        'G': 'C', 'C': 'G',
+                        'g': 'c', 'c': 'g'}
+            x = dna_dict
         res_seq = ''
-        for j in i:
-            res_seq += x.get(j)  # Поиск значений по словарю
+        for j in nuc:
+            '''Getting value from dictionary'''
+            res_seq += x.get(j)
         comp.append(res_seq)
     rev = []
-    for i in comp:
-        rev.append(i[len(i):: -1])
+    for nuc in comp:
+        rev.append(nuc[len(nuc):: -1])
     if len(rev) == 1:
-        return rev[0]  # Условие для вывода одной строки или списка
+        '''Çheck the length of result sequence
+        for output form'''
+        return rev[0]
     else:
         return rev
