@@ -1,44 +1,12 @@
-from tools.dna_rna_tools import (valid, transcribe, reverse,
-                                 complement, reverse_complement)
-from tools.filter_parameters import (ch_length_bounds, ch_gc_bounds,
-                                     ch_quality_threshold, read_fastq,
-                                     write_fastq)
+import Bio.SeqIO
+import Bio.SeqUtils
+import os
 
 
-def run_dna_rna_tools(*args) -> str | list:
-    """
-    Function run_dna_rna_tools() returns nuc acid sequence after actions
-    on initial RNA or DNA nucs sequence ordered by the procedure
-    wrote in argument.
-    Function make check for exsistance of initial nucs sequences, by checking
-    simultanously presence of T and U in seq.
-    In case of negarive resalt func returns:
-    "Please insert correct sequence"
-    Possible variant of func colling:
-    run_dna_rna_tools('ATG','aT','reverse')
-        'ATG','aT',... - optional quantity of arguments, consisting of
-        nuc sequences in str format.
-        'reverse' - always last parameter in function, with istruction
-        for required procedure.
-        Procedure list:
-            'reverse' - return reversed sequence.
-            'transcribe' - return transcribed sequence.
-            'complement' - return comlemented sequence.
-            'reverse_complement' - returns reversed and complemented seq.
-    Return value: string with one sequence of nucs or list with multiple
-    seqs of nucs, depending on quantity of initial seqs.
-    """
-    seq: tuple = args[: -1]
-    if valid(seq) is False:
-        return "Please insert correct sequence"
-    elif args[-1] == 'transcribe':
-        return transcribe(seq)
-    elif args[-1] == 'reverse':
-        return reverse(seq)
-    elif args[-1] == 'complement':
-        return complement(seq)
-    elif args[-1] == 'reverse_complement':
-        return reverse_complement(seq)
+def _in_bounds(value, bounds):
+    if type(bounds) is int:
+        bounds = [0, bounds]
+    return bounds[0] <= value <= bounds[1]
 
 
 def filter_fastq(input_fastq: str, output_fastq: str,
@@ -69,7 +37,6 @@ def filter_fastq(input_fastq: str, output_fastq: str,
         default 0(scale Phred33). Reads with quality lower then
         treshold are decline.
     """
-    import os
     parent_dir = os.path.dirname(input_fastq)
     new_file_path = os.path.join(parent_dir, 'filtered', output_fastq)
     '''Checks the name of new file is no the same as name of other files
@@ -78,21 +45,88 @@ def filter_fastq(input_fastq: str, output_fastq: str,
     '''
     if os.path.isfile(new_file_path):
         return 'Please insert other name for output file, file is exsist'
-    location_of_reading = 0
-    while True:
-        '''Call read func to read the sequence from input file, and take
-        position of last reading in the file'''
-        seqs, location_of_reading = read_fastq(input_fastq,
-                                               location_of_reading)
-        '''Check the end of all seqs, break the cicle if find '' in
-        seqs dictionary'''
-        if '' in seqs:
-            break
-        '''Checking complience for all filter parameters '''
-        for seq in seqs:
-            cond1 = ch_length_bounds(seqs[seq], length_bounds)
-            cond2 = ch_gc_bounds(seqs[seq], gc_bounds)
-            cond3 = ch_quality_threshold(seqs[seq], quality_threshold)
+    
+    with open(new_file_path, "w") as output:
+        for rec in Bio.SeqIO.parse(input, "fastq"):
+            seq = rec.seq
+            quality = rec.letter_annotations["phred_quality"]
+
+            cond1 = _in_bounds(len(seq), length_bounds)
+            cond2 = _in_bounds(Bio.SeqUtils.gc_fraction(seq) * 100, gc_bounds)
+            cond3 = sum(quality) / len(quality) >= quality_threshold
             if cond1 and cond2 and cond3:
-                write_fastq(input_fastq, output_fastq, seqs)
+                Bio.SeqIO.write(rec, output, "fastq")
+
     return 'Filtering is complete'
+
+
+class BiologicalSequence:
+    def __len__(self):
+        pass
+    def __getitem__(self, index):
+        pass
+    def __str__(self):
+        pass
+    def check_alphabet(self):
+        pass
+
+class NucleicAcidSequence(BiologicalSequence):
+    def __init__(self, seq):
+        self.seq = seq
+    def complement(self):
+        res = []
+        for c in self.seq:
+            res.append(self.complement_dict[c])
+        return self.__class__("".join(res))
+    def reverse(self):
+        return self.__class__(self.seq[::-1])
+    def reverse_complement(self):
+        return self.complement().reverse()    
+    def __len__(self):
+        return len(self.seq)
+    def __getitem__(self, index):
+        return self.seq[index]
+    def __str__(self):
+        return self.seq
+    def check_alphabet(self):
+        valid = set(self.complement_dict.keys())
+        for c in self.seq:
+            if c not in valid:
+                return False
+        return True
+
+
+class DNASequence(NucleicAcidSequence):
+    complement_dict = {'T': 'A', 'A': 'T',
+                'a': 't', 't': 'a',
+                'G': 'C', 'C': 'G',
+                'g': 'c', 'c': 'g'}
+    
+    def transcribe(self):
+        s = self.seq.replace("T", "U")
+        s = s.replace("t", "u")
+        return RNASequence(s)
+
+
+class RNASequence(NucleicAcidSequence):
+    complement_dict = {'G': 'C', 'C': 'G',
+            'g': 'c', 'c': 'g',
+            'A': 'U', 'U': 'A',
+            'a': 'u', 'u': 'a'}
+
+
+class AminoAcidSequence(BiologicalSequence):
+    def __init__(self, seq):
+        self.seq = seq
+    def __len__(self):
+        return len(self.seq)
+    def __getitem__(self, index):
+        return self.seq[index]
+    def __str__(self):
+        return "".join(self.seq)
+    def check_alphabet(self):
+        valid = set("ABCDEFGHIJKLMNOPQRSTUVWYZ")
+        for c in self.seq:
+            if c not in valid:
+                return False
+        return True
